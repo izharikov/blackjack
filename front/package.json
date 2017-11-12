@@ -1,0 +1,77 @@
+{
+  "name": "blackjack",
+  "version": "1.0.0",
+  "description": "Start building complex react-redux apps today, with this minimalist easy to understand starter kit (boilerplate)",
+  "keywords": [
+    "react",
+    "redux",
+    "minimal",
+    "starter kit",
+    "boilerplate"
+  ],
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/catalin-luntraru/redux-minimal"
+  },
+  "scripts": {
+    "start": "./node_modules/.bin/webpack-dev-server --output-public-path=/dist/ --config webpack.config.js --hot",
+    "build": "./node_modules/.bin/webpack --watch --watch-poll --config webpack.config.js"
+  },
+  "babel": {
+    "presets": [
+      "es2015",
+      "react",
+      "stage-3"
+    ]
+  },
+  "author": "Catalin Luntraru",
+  "license": "MIT",
+  "dependencies": {
+    "prop-types": "^15.5.10",
+    "react": "^15.5.4",
+    "react-bootstrap": "^0.30.7",
+    "react-dom": "^15.5.4",
+    "react-modal": "^1.7.7",
+    "react-playing-card": "^0.2.5",
+    "react-redux": "^5.0.5",
+    "react-router": "^4.1.1",
+    "react-router-dom": "^4.1.1",
+    "redux": "^3.6.0",
+    "redux-api-middleware": "^1.0.3",
+    "redux-thunk": "^2.2.0"
+  },
+  "devDependencies": {
+    "aspnet-webpack": "^2.0.1",
+    "babel-core": "^6.21.0",
+    "babel-loader": "^6.2.10",
+    "babel-polyfill": "^6.20.0",
+    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-es2016": "^6.18.0",
+    "babel-preset-es2017": "^6.18.0",
+    "babel-preset-react": "^6.16.0",
+    "babel-preset-stage-2": "^6.17.0",
+    "babel-preset-stage-3": "^6.17.0",
+    "babel-runtime": "^6.20.0",
+    "clean-webpack-plugin": "^0.1.15",
+    "css-loader": "^0.26.1",
+    "enzyme": "^2.7.0",
+    "extract-text-webpack-plugin": "^2.1.2",
+    "file-loader": "^1.1.5",
+    "html-webpack-harddisk-plugin": "^0.1.0",
+    "html-webpack-plugin": "^2.30.1",
+    "ignore-styles": "^5.0.1",
+    "mocha": "^3.2.0",
+    "node-sass": "^4.3.0",
+    "postcss-loader": "^2.0.8",
+    "react-addons-test-utils": "^15.4.2",
+    "react-hot-loader": "^1.3.1",
+    "redux-freeze": "^0.1.5",
+    "sass-loader": "^4.1.1",
+    "style-loader": "^0.13.1",
+    "webpack": "^2.6.1",
+    "webpack-cleanup-plugin": "^0.5.1",
+    "webpack-dev-server": "^2.4.5",
+    "whatwg-fetch": "^2.0.1"
+  }
+}

@@ -1,0 +1,184 @@
+$scale: 0.4;
+$scale-for-empty-card: 0.7;
+$color: #c0c0c0;
+$background: #fbfbfb;
+$gutter: $scale * 10px;
+$font-size: $scale * 34px;
+$font-centered-size: $scale * 200px;
+
+$card-background: #fff;
+$card-border: 1px solid #c0c0c0;
+$card-padding: $scale * 4px;
+$card-width: $scale * 172px;
+$card-height: $scale * 240px;
+$card-color-red: #e44145;
+$card-color-black: #252525;
+$card-symbol-size: $scale * 40px;
+
+.cardset {
+    display: inline-flex;
+    width: 300px;
+    .cardwrapper{
+        margin: 0 auto;
+    }
+    .playcard:first-child {
+        margin-left: 0;
+    }
+}
+
+.playcard {
+    display: inline-flex;
+    margin-left: -0.5 * $scale * 172px;
+}
+
+.cards {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.card {
+    position: relative;
+    display: inline-block;
+    width: $card-width;
+    height: $card-height;
+    font: $font-size "Trebuchet MS";
+    margin: $gutter;
+    border: $card-border;
+    border-radius: $card-padding;
+    background: $card-background;
+
+    &:before,
+    &:after {
+        content: attr(value);
+        position: absolute;
+        width: $scale * 24px;
+        text-align: center;
+        letter-spacing: $scale * -2px;
+    }
+
+    &:before {
+        top: $card-padding;
+        left: $card-padding;
+    }
+
+    &:after {
+        bottom: $card-padding;
+        right: $card-padding;
+        transform: rotate(180deg);
+    }
+
+    &heart {
+        color: $card-color-red;
+
+        &:before,
+        &:after {
+            content: attr(value) " ♥";
+        }
+    }
+
+    &spade {
+        color: $card-color-black;
+
+        &:before,
+        &:after {
+            content: attr(value) " ♠";
+        }
+    }
+
+    &club {
+        color: $card-color-black;
+
+        &:before,
+        &:after {
+            content: attr(value) " ♣";
+        }
+    }
+
+    &diamond {
+        color: $card-color-red;
+
+        &:before, &:after {
+            content: attr(value) " ♦";
+        }
+    }
+}
+
+.card__inner {
+    box-sizing: border-box;
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    top: 6 * $card-padding;
+    left: 6 * $card-padding;
+    right: 6 * $card-padding;
+    bottom: 6 * $card-padding;
+
+    &centered {
+        justify-content: center;
+    }
+}
+
+.card__column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    &centered {
+        justify-content: center;
+        margin: 0 auto;
+    }
+}
+
+.card__symbol {
+    display: inline-block;
+    height: $card-symbol-size;
+    text-align: center;
+
+    &:before {
+        font-size: $font-centered-size;
+        line-height: $card-symbol-size;
+    }
+
+    .cardheart &:before {
+        content: '♥';
+    }
+
+    .cardspade &:before {
+        content: '♠';
+    }
+
+    .carddiamond &:before {
+        content: '♦';
+    }
+
+    .cardclub &:before {
+        content: '♣';
+    }
+
+    &rotated,
+    &:last-of-type {
+        transform: rotate(180deg);
+    }
+
+    &:first-of-type {
+        transform: rotate(0);
+    }
+
+    &big {
+        flex-basis: 0.25 * $card-height;
+    }
+
+    &huge {
+        flex-basis: 0.45 * $card-height;
+    }
+}
+
+.empty_card {
+    background-image: url("../img/playing-card-back.jpg");
+    width: $scale-for-empty-card * $card-width + 2 * $gutter + 2;
+    height: $scale-for-empty-card * $card-height + 2 * $gutter + 2;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}

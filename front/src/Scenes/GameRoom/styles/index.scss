@@ -1,0 +1,42 @@
+@mixin distribute-on-circle($nb-items, $circle-size, $item-size, $cls) {
+    $angle: 30, 120, 30, 30, 120, 30;
+    $scale: 3, 2, 2, 3, 2, 2;
+    $rot: 0;
+    $translate-size: 2 * $circle-size;
+    $top: 10, -5, -5, 10, 27,27;
+    $left: 50,50,50,46,50,50;
+
+    @for $i from 1 through $nb-items {
+        > :nth-of-type(#{$i}) {
+            &.#{$cls} {
+                transform: rotate($rot * 1deg) translate($translate-size * nth($scale, $i)) rotate($rot * -1deg);
+                top: percentage(nth($top, $i) / 100);
+                left: percentage(nth($left, $i) / 100);
+                $rot: $rot + nth($angle, $i);
+            }
+        }
+    }
+}
+
+.gamewrapper {
+    
+        
+        margin-top: -264px;
+
+    .gameroom {
+        width: 60em;
+        height: 15em;
+        box-sizing: content-box;
+        margin: 23em auto 0;
+        position: relative;
+        border: 1px solid black;
+        border-radius: 104px;
+
+        @include distribute-on-circle(6, 5em, 6em, "gameplace");
+
+        .gameplace {
+            display: block;
+            position: absolute;
+        }
+    }
+}
