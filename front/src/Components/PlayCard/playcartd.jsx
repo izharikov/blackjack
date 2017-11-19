@@ -34,8 +34,10 @@ export class EmptyCardSet extends Component {
         let { count } = this.props;
         let renderedCards = [];
         for (let i = 0; i < count; i++) {
-            renderedCards.push(<div className={`${styles.empty_card} ${styles.playcard}`}
-                key={i} />);
+            renderedCards.push(<div className={`${styles.playcard}`}
+                key={i} >
+                    <div className={`${styles.empty_card}`} />
+                </div>);
         }
         return <div className={styles.cardset}>
             <div className={styles.cardwrapper}>

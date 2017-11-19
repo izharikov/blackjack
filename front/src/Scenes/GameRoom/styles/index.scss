@@ -3,7 +3,7 @@
     $scale: 3, 2, 2, 3, 2, 2;
     $rot: 0;
     $translate-size: 2 * $circle-size;
-    $top: 10, -5, -5, 10, 27,27;
+    $top: 10, -5, -5, 10, 14,14;
     $left: 50,50,50,46,50,50;
 
     @for $i from 1 through $nb-items {
@@ -21,7 +21,7 @@
 .gamewrapper {
     
         
-        margin-top: -264px;
+    margin-top: -229px;
 
     .gameroom {
         width: 60em;

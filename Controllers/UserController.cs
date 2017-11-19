@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using BlackjackGame.Common;
 using BlackjackGame.Context;
 using BlackjackGame.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -33,6 +34,15 @@ namespace BlackjackGame.Controllers
             return Json(_context.Users);
         }
 
+        [Authorize]
+        [HttpGet]
+        [Route("user")]
+        public JsonResult GetCurrentUserInfo()
+        {
+            var user = new {name = HttpContext.GetUserName()};
+            return Json(user);
+        }
+
         [HttpPost]
         [Route("login")]
         public async Task<ActionResult> Login([FromBody] LoginModel loginModel)
@@ -58,7 +68,7 @@ namespace BlackjackGame.Controllers
                 UserName = loginModel.Name,
                 Id = Guid.NewGuid().ToString()
             });
-            _context.SaveChanges(); 
+            _context.SaveChanges();
             await Login(loginModel.Name);
             return Json(SignInResult.Success);
         }

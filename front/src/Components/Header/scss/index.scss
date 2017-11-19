@@ -1,0 +1,13 @@
+.header{
+    display: flex;
+    flex-direction: row-reverse;
+    background: #e0e0e0;
+    min-height: 30px;
+    > div{
+        padding: 3px;
+    }
+    a{
+        margin: 9px;
+        vertical-align: middle;
+    }
+}

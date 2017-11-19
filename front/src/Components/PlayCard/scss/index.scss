@@ -16,19 +16,20 @@ $card-color-black: #252525;
 $card-symbol-size: $scale * 40px;
 
 .cardset {
-    display: inline-flex;
     width: 300px;
     .cardwrapper{
         margin: 0 auto;
+        display: flex;
     }
-    .playcard:first-child {
-        margin-left: 0;
+    .playcard:last-child {
+        overflow: unset;
     }
 }
 
 .playcard {
-    display: inline-flex;
-    margin-left: -0.5 * $scale * 172px;
+    flex: 1 1 0;
+    overflow: hidden;
+    max-width: 40px;
 }
 
 .cards {
@@ -39,11 +40,10 @@ $card-symbol-size: $scale * 40px;
 
 .card {
     position: relative;
-    display: inline-block;
+    margin: 8px auto;
     width: $card-width;
     height: $card-height;
     font: $font-size "Trebuchet MS";
-    margin: $gutter;
     border: $card-border;
     border-radius: $card-padding;
     background: $card-background;

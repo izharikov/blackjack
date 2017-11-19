@@ -13,7 +13,8 @@ namespace BlackjackGame.Service
         public Dictionary<int, BlackjackUser> Users { get; set; }
         public Dictionary<int, BlackjackUser> UsersInQueue { get; set; }
         public Dictionary<int, BlackjackUser> NotNullUsers { get; set; }
-        
+        public Dictionary<BlackjackUser, bool> UserMoved { get; set; }
+
         [JsonIgnore]
         public PlayCardSet PlayCardSet { get; set; }
 
@@ -28,6 +29,7 @@ namespace BlackjackGame.Service
             Users = new Dictionary<int, BlackjackUser>();
             PlayCardSet = new PlayCardSet();
             UsersInQueue = new Dictionary<int, BlackjackUser>();
+            UserMoved = new Dictionary<BlackjackUser, bool>();
             foreach (var i in Enumerable.Range(0, 6))
             {
                 Users.Add(i, null);
@@ -49,6 +51,10 @@ namespace BlackjackGame.Service
         public void RemoveUser(int place)
         {
             var removedUser = Users[place];
+            if (removedUser != null)
+            {
+                UserMoved[removedUser] = true;
+            }
             Users[place] = null;
             NotNullUsers = new Dictionary<int, BlackjackUser>();
             var idx = 0;
@@ -67,13 +73,28 @@ namespace BlackjackGame.Service
         }
 
         [JsonIgnore]
-        public BlackjackGameResult GameResult =>
-            new BlackjackGameResult()
+        public BlackjackGameResult GameResult
+        {
+            get
             {
-                Winners = Users.Values.Where(user => user != null && user.Score < 22)
+                var winners = Users.Values.Where(user => user != null && user.Score < 22)
                     .Select(user => user.Copy())
-                    .OrderBy(user => Math.Abs(user.Score - 21)).ToList()
-            };
+                    .OrderBy(user => Math.Abs(user.Score - 21)).ToList();
+                var winnerScore = winners.FirstOrDefault()?.Score ?? 0;
+                winners = winners.Any()
+                    ? winners.Where(u => u.Score == winnerScore)
+                        .ToList()
+                    : new List<BlackjackUser>();
+                return new BlackjackGameResult()
+                {
+                    Winners = winners,
+                    Sum = winnerScore,
+                    AllUsers = NotNullUsers
+                        .Select(w => w.Value)
+                        .Where(u => u != null).ToList()
+                };
+            }
+        }
 
         public bool StartGame()
         {
@@ -89,6 +110,7 @@ namespace BlackjackGame.Service
                 if (user.Value != null)
                 {
                     NotNullUsers.Add(idx, user.Value);
+                    UserMoved.Add(user.Value, false);
                     idx++;
                 }
             }
@@ -109,11 +131,17 @@ namespace BlackjackGame.Service
             }
             CurrentUserIndex = (CurrentUserIndex + 1) % NotNullUsers.Count;
             CurrentUser = NotNullUsers[CurrentUserIndex];
-            if (couldEndGame && CurrentUser == Banker)
+            if (couldEndGame)
+            {
+                UserMoved[NotNullUsers[CurrentUserIndex]] = true;
+            }
+            if (couldEndGame && AllMoved())
             {
                 GameEnded = true;
             }
         }
+
+        public bool AllMoved() => UserMoved.All(v => v.Value);
 
         public void SetBankAmount(int amount)
         {
@@ -124,5 +152,7 @@ namespace BlackjackGame.Service
     public class BlackjackGameResult
     {
         public List<BlackjackUser> Winners { get; set; }
+        public List<BlackjackUser> AllUsers { get; set; }
+        public int Sum { get; set; }
     }
 }

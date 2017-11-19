@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using BlackjackGame.Context;
+using BlackjackGame.Extenstions;
 using BlackjackGame.Models;
 using BlackjackGame.WebSockets;
 using BlackjackGame.WebSockets.Common;
@@ -32,37 +33,10 @@ namespace BlackjackGame
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services
-                .AddAuthentication(auth =>
-                {
-                    auth.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    auth.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    auth.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                })
-                .AddCookie(options =>
-                {
-                    options.Events = new CookieAuthenticationEvents
-                    {
-                        OnRedirectToLogin = ctx =>
-                        {
-                            if (ctx.Request.Path.StartsWithSegments("/api"))
-                            {
-                                ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                                ctx.Response.ContentType = "application/json";
-                                var response = Encoding.ASCII.GetBytes("{\"error\" : \"anauthorized\"}");
-                                ctx.Response.Body.Write(response, 0, response.Length);
-                                return Task.CompletedTask;
-                            }
-                            ctx.Response.Redirect(ctx.RedirectUri);
-                            return Task.CompletedTask;
-                        },
-                    };
-                    options.LoginPath = "/login";
-                    options.LogoutPath = "/logout";
-                });
+                .AddAuthentificationWithCookie();
             services.AddMvc();
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
@@ -70,9 +44,9 @@ namespace BlackjackGame
                 options.IdleTimeout = TimeSpan.FromSeconds(10);
                 options.Cookie.HttpOnly = true;
             });
-            var connection =
-                @"Server=localhost,1401;Database=TestDB;User Id=SA;Password=kind6iVy;Trusted_Connection=False;";
-            services.AddDbContext<BlackjackGameContext>(options => options.UseSqlServer(connection));
+            var connectionString =
+                Configuration.GetConnectionString("Database");
+            services.AddDbContext<BlackjackGameContext>(options => options.UseSqlServer(connectionString));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

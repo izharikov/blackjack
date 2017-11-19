@@ -9,7 +9,7 @@ namespace BlackjackGame.Model
         public string Name { get; set; }
 
         [JsonIgnore]
-        public int Score => Carts.Select(cart => (int) cart.Rank).Sum();
+        public int Score => Carts.Select(cart => cart.Rank.Value()).Sum();
 
         [JsonIgnore]
         public List<PlayCard> Carts { get; set; }

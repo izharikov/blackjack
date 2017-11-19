@@ -12,10 +12,13 @@ import websocket from './middleware/websocket';
 import AppGameRoom, { gameRoomReducer } from './Scenes/GameRoom/index';
 import { RegisterPage, LoginPage} from './Scenes/Authentification/index';
 import { registerReducer } from './Components/RegisterForm/index';
+import styles from './scss/index';
+import {headerReducer} from './Components/Header/index';
 
 let initialState = {
     loginPage: {
     },
+    header : {},
     registerPage : {},
     gameRoom: {
         gameState:{},
@@ -28,7 +31,8 @@ let initialState = {
 let store = createStore(combineReducers({
     loginPage: loginReducer,
     registerPage : registerReducer,
-    gameRoom: gameRoomReducer
+    gameRoom: gameRoomReducer,
+    header : headerReducer
 }), initialState, applyMiddleware(apiMiddleware, logger, websocket));
 
 render(

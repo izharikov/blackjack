@@ -4,6 +4,9 @@ import { createConnectedComponent } from './Container/index';
 import GamePlace from './GamePlace/index';
 import styles from './styles/index';
 import { EmptyCardSet } from '../../Components/PlayCard/playcartd';
+import { PageWrapper } from '../../Components/PageWrapper/index';
+import { Modal, ModalHeader, ModalContent } from '../../Components/Modal/index';
+
 
 class GameRoom extends Component {
     constructor(props) {
@@ -13,6 +16,10 @@ class GameRoom extends Component {
         this.sitOnPlace = this.sitOnPlace.bind(this);
         this.acceptCard = this.acceptCard.bind(this);
         this.declineCard = this.declineCard.bind(this);
+        this.state = {
+            modalOpen: false
+        }
+        this.closeModal = this.closeModal.bind(this);
     }
 
     componentWillMount() {
@@ -38,14 +45,47 @@ class GameRoom extends Component {
         })
     }
 
-    render() {
-        let { gameState = {}, currentUser = {} , winner} = this.props;
-        let { Users: users = [], CurrentUser: moveOfPlayer = {} } = gameState;
-        if ( winner != null){
-            console.warn('!!!   WInner !!!', winner)
-            alert('Winner : ' +  JSON.stringify(winner));
+    renderWinnersModalModal(winner = { Winners: [] }, state, closeModal) {
+        // Winner : {"Winners":[{"Name":"igor","CountOfCards":3}],"Sum":20}
+        return <Modal isOpen={state.modalOpen} onModalClose={closeModal}>
+            <ModalHeader title="Blackjack Game Results" onModalClose={closeModal} />
+            <ModalContent>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Count of cards</th>
+                            <th>Sum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {winner.Winners.map(win => <tr>
+                            <td>{win.Name}</td>
+                            <td>{win.CountOfCards}</td>
+                            <td>{winner.Sum}</td>
+                        </tr>)}
+                    </tbody>
+                </table>
+            </ModalContent>
+        </Modal>
+    }
+
+    closeModal() {
+        this.setState({ modalOpen: false })
+    }
+
+    componentWillReceiveProps(nextProps) {
+        let { winner } = nextProps;
+        if (winner != null) {
+            this.setState({ modalOpen: true });
         }
-        if ( !moveOfPlayer ){
+    }
+
+    render() {
+        let { gameState = {}, currentUser = {}, winner } = this.props;
+        let { Users: users = [], CurrentUser: moveOfPlayer = {} } = gameState;
+        let winnerModal = this.renderWinnersModalModal(winner, this.state, this.closeModal);
+        if (!moveOfPlayer) {
             moveOfPlayer = {};
         }
         let renderedUsers = [];
@@ -57,18 +97,21 @@ class GameRoom extends Component {
                     acceptCard={this.acceptCard}
                     declineCard={this.declineCard}
                     enableMove={moveOfPlayer.Name == currentUser.name}
-                    userInGame={currentUser.name}/>
+                    userInGame={currentUser.name} />
             </li>);
         }
-        renderedUsers.push(<li className={styles.gameplace} key="empty-cards" 
-            style={{top: "37%",left: "37%"}}>
-            <EmptyCardSet count={7}/>
+        renderedUsers.push(<li className={styles.gameplace} key="empty-cards"
+            style={{ top: "37%", left: "37%" }}>
+            <EmptyCardSet count={10} />
         </li>)
-        return <div className={styles.gamewrapper}>
-            <ul className={styles.gameroom}>
-                {renderedUsers}
-            </ul>
-        </div>
+        return <PageWrapper>
+            <div className={styles.gamewrapper}>
+                <ul className={styles.gameroom}>
+                    {renderedUsers}
+                </ul>
+            </div>
+            {winnerModal}
+        </PageWrapper>
     }
 }
 
