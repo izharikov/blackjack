@@ -6,7 +6,7 @@ const mapStateToProps = (state, ownProps) => {
     return state.gameRoom;
 };
 
-const blackjackSocketUrl = 'ws://localhost:5000/ws/blackjack';
+const blackjackSocketUrl = `ws://${location.host}/ws/blackjack`;
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {

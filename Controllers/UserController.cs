@@ -5,7 +5,8 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using BlackjackGame.Common;
 using BlackjackGame.Context;
-using BlackjackGame.Models;
+using BlackjackGame.Model;
+using BlackjackGame.Model.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -39,7 +40,7 @@ namespace BlackjackGame.Controllers
         [Route("user")]
         public JsonResult GetCurrentUserInfo()
         {
-            var user = new {name = HttpContext.GetUserName()};
+            var user = new { name = HttpContext.GetUserName() };
             return Json(user);
         }
 
@@ -47,11 +48,11 @@ namespace BlackjackGame.Controllers
         [Route("login")]
         public async Task<ActionResult> Login([FromBody] LoginModel loginModel)
         {
-            if (!UserExists(loginModel))
+            if (!CheckUserExistsAndSetId(loginModel))
             {
                 return Json(SignInResult.Failed);
             }
-            await Login(loginModel.Name);
+            await LoginUserInSystem(loginModel);
             return Json(SignInResult.Success);
         }
 
@@ -59,17 +60,19 @@ namespace BlackjackGame.Controllers
         [Route("register")]
         public async Task<ActionResult> Register([FromBody] LoginModel loginModel)
         {
-            if (UserExists(loginModel))
+            if (CheckUserExistsAndSetId(loginModel))
             {
                 return Json(SignInResult.Failed);
             }
+            var userId = Guid.NewGuid().ToString();
             _context.Users.Add(new User()
             {
                 UserName = loginModel.Name,
-                Id = Guid.NewGuid().ToString()
+                UserId = userId
             });
+            loginModel.Id = userId;
             _context.SaveChanges();
-            await Login(loginModel.Name);
+            await Login(loginModel);
             return Json(SignInResult.Success);
         }
 
@@ -83,16 +86,23 @@ namespace BlackjackGame.Controllers
             return Json(SignInResult.Success);
         }
 
-        private bool UserExists(LoginModel loginModel)
+        private bool CheckUserExistsAndSetId(LoginModel loginModel)
         {
-            return _context.Users.Any(u => u.UserName == loginModel.Name);
+            var user = _context.Users.FirstOrDefault(u => u.UserName == loginModel.Name);
+            if (user != null)
+            {
+                loginModel.Id = user.UserId;
+            }
+            return user != null;
         }
 
-        private async Task Login(string name)
+        private async Task LoginUserInSystem(LoginModel loginModel)
         {
+            var name = loginModel.Name;
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, name)
+                new Claim(ClaimTypes.Name, name),
+                new Claim("id", loginModel.Id)
             };
 
             var userIdentity = new ClaimsIdentity(claims, "login");
@@ -108,6 +118,48 @@ namespace BlackjackGame.Controllers
         public ActionResult Protected()
         {
             return GetAllUsers();
+        }
+
+        [HttpGet]
+        [Route("all-game-results")]
+        public ActionResult GameResults()
+        {
+            var res = _context.GameResults
+                .Include(gr => gr.UserGameResults)
+                .ThenInclude(gr => gr.User)
+                .ToList();
+            var first = res.FirstOrDefault();
+            var gameResults = first.UserGameResults;
+            if (gameResults != null)
+            {
+                var game = gameResults;
+            }
+            return Json(res);
+        }
+
+        [HttpGet]
+        [Route("game-res-for-user")]
+        [Authorize]
+        public ActionResult GameResForUsers()
+        {
+            var userId = HttpContext.GetUserId();
+            var res = _context.Users
+                .Where(u => u.UserId == userId)
+                .Include(gr => gr.UserGameResults);
+            var jsonRes = res.Select(user => new UserStatisticsJsonViewModel()
+            {
+                UserId = userId,
+                GameResult = user.UserGameResults
+                    .Where(ugr => ugr.GameResult != null)
+                    .Select(ugr => new UserGameResultJsonViewModel()
+                    {
+                        GameId = ugr.GameResultId,
+                        WinnerScore = ugr.GameResult.WinnerScore,
+                        IsWinner = ugr.IsWinner,
+
+                    }).ToList()
+            }).FirstOrDefault();
+            return Json(jsonRes);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace BlackjackGame.Models
+﻿namespace BlackjackGame.Model
 {
     public class Inventory
     {

@@ -6,6 +6,8 @@ namespace BlackjackGame.Model
 {
     public class BlackjackUser
     {
+        public string UserId { get; set; }
+        
         public string Name { get; set; }
 
         [JsonIgnore]
@@ -16,9 +18,10 @@ namespace BlackjackGame.Model
 
         public int CountOfCards => Carts.Count;
 
-        public BlackjackUser(string name)
+        public BlackjackUser(string name, string id)
         {
             Name = name;
+            UserId = id;
             Carts = new List<PlayCard>();
         }
 
@@ -30,7 +33,7 @@ namespace BlackjackGame.Model
 
         public BlackjackUser Copy()
         {
-            return new BlackjackUser(Name)
+            return new BlackjackUser(Name, UserId)
             {
                 Carts = Carts
             };

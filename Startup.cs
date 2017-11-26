@@ -8,7 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using BlackjackGame.Context;
 using BlackjackGame.Extenstions;
-using BlackjackGame.Models;
+using BlackjackGame.Model;
+using BlackjackGame.Service;
 using BlackjackGame.WebSockets;
 using BlackjackGame.WebSockets.Common;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -47,6 +48,7 @@ namespace BlackjackGame
             var connectionString =
                 Configuration.GetConnectionString("Database");
             services.AddDbContext<BlackjackGameContext>(options => options.UseSqlServer(connectionString));
+            services.AddScoped<DbService, DbService>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

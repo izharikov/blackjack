@@ -11,5 +11,11 @@ namespace BlackjackGame.Common
             return context.User.Claims.Where(c => c.Type == ClaimTypes.Name)
                 .Select(c => c.Value).SingleOrDefault();
         }
+
+        public static string GetUserId(this HttpContext context)
+        {
+            return context.User.Claims.Where(c => c.Type == "id")
+                .Select(c => c.Value).SingleOrDefault();
+        }
     }
 }

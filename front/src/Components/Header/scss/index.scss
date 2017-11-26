@@ -1,10 +1,13 @@
 .header{
     display: flex;
-    flex-direction: row-reverse;
+    // flex-direction: row-reverse;
     background: #e0e0e0;
     min-height: 30px;
     > div{
         padding: 3px;
+        &:first-child{
+            flex: 1 1 auto;
+        }
     }
     a{
         margin: 9px;

@@ -8,7 +8,7 @@ import rest from '../../common/rest';
 class HeaderComponent extends Component {
     constructor(props) {
         super(props);
-        let {callUserInfo} = props;
+        let { callUserInfo } = props;
         this.callUserInfo = callUserInfo.bind(this);
     }
 
@@ -20,7 +20,14 @@ class HeaderComponent extends Component {
     render() {
         let { loggedIn = false, name } = this.props;
         return <div className={styles.header}>
-            {loggedIn && <div>{name}</div>}
+            <div>
+                <Link to="/gameroom">Game</Link>
+            </div>
+            {loggedIn && <div>
+                <Link to="/statistics">Statistics</Link>
+                &nbsp;
+                {name}
+            </div>}
             {!loggedIn && <div>
                 <Link to="/login">Login</Link>
                 <Link to="/register">Register</Link>
@@ -61,7 +68,6 @@ const userInfoAction = () => {
 }
 
 const mapStateToProp = (state) => {
-    console.log('mapStateToProp', state)
     return state.header;
 }
 

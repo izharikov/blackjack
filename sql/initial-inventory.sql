@@ -1,7 +1,3 @@
-CREATE DATABASE TestDB
-
-GO 
-
 USE TestDB
 
 CREATE TABLE Inventory (id INT, name NVARCHAR(50), quantity INT);

@@ -7,12 +7,13 @@ using System.Text;
 using System.Threading.Tasks;
 using BlackjackGame.Common;
 using BlackjackGame.Model;
-using BlackjackGame.Models;
+using BlackjackGame.Model;
 using BlackjackGame.Service;
 using BlackjackGame.WebSockets.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore.Query.ExpressionVisitors.Internal;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
 
@@ -22,6 +23,9 @@ namespace BlackjackGame.WebSockets
     {
         private Service.BlackjackGame _blackjackGame = new Service.BlackjackGame();
         private BlackjackMessageBuilder _messageBuilder;
+
+        private readonly Func<HttpContext, DbService> _dbService = (context) => context.RequestServices.GetRequiredService<DbService>();
+        
 
         public BlackjackGameWebSocketHandler()
         {
@@ -77,7 +81,7 @@ namespace BlackjackGame.WebSockets
             {
                 var gameResult = _blackjackGame.GameResult;
                 await ReinitGame();
-                await SendGameInfoWithWinner(gameResult);
+                await SendGameInfoWithWinner(context, gameResult);
             }
             else
             {
@@ -106,11 +110,12 @@ namespace BlackjackGame.WebSockets
         {
             var place = Convert.ToInt32(message[BlackjackConstants.Message.PlaceNumber]);
             var name = context.GetUserName();
+            var id = context.GetUserId();
             var curentUser = _blackjackGame.Users
                 .FirstOrDefault(entry => entry.Value?.Name == name);
             if (curentUser.Value == null)
             {
-                var user = new BlackjackUser(name);
+                var user = new BlackjackUser(name, id);
                 if (_blackjackGame.GameStarted)
                 {
                     _blackjackGame.UsersInQueue.Add(place, user);
@@ -135,8 +140,9 @@ namespace BlackjackGame.WebSockets
             await SendGameInfoWithTask(_messageBuilder.BuildGameStateMessageWithCurrentUser);
         }
 
-        public async Task SendGameInfoWithWinner(BlackjackGameResult result)
+        public async Task SendGameInfoWithWinner(HttpContext context, BlackjackGameResult result)
         {
+            await _dbService(context).SaveBlackjackGameResult(result);
             foreach (var websocketWrapper in _websockets)
             {
                 var wrapper = websocketWrapper.Value;
@@ -218,7 +224,7 @@ namespace BlackjackGame.WebSockets
                     _blackjackGame.GameEnded = true;
                     var gameResult = _blackjackGame.GameResult;
                     await ReinitGame();
-                    await SendGameInfoWithWinner(gameResult);
+                    await SendGameInfoWithWinner(context, gameResult);
                 }
             }
         }

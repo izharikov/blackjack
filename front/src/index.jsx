@@ -14,6 +14,7 @@ import { RegisterPage, LoginPage} from './Scenes/Authentification/index';
 import { registerReducer } from './Components/RegisterForm/index';
 import styles from './scss/index';
 import {headerReducer} from './Components/Header/index';
+import { StatisticsPage , statisticsReducer} from './Scenes/Statistics/index';
 
 let initialState = {
     loginPage: {
@@ -32,7 +33,8 @@ let store = createStore(combineReducers({
     loginPage: loginReducer,
     registerPage : registerReducer,
     gameRoom: gameRoomReducer,
-    header : headerReducer
+    header : headerReducer,
+    statistics: statisticsReducer
 }), initialState, applyMiddleware(apiMiddleware, logger, websocket));
 
 render(
@@ -43,6 +45,7 @@ render(
                 <Route path="/login" component={LoginPage} />
                 <Route path="/register" component={RegisterPage} />
                 <Route path="/gameroom" component={AppGameRoom} />
+                <Route path="/statistics" component={StatisticsPage}/>
             </Switch>
         </BrowserRouter>
     </Provider>,
