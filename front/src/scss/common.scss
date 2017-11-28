@@ -1,0 +1,10 @@
+@mixin animation($keyframe, $duration, $iteration, $timing-function){
+    -webkit-animation: $keyframe $duration $iteration $timing-function;
+    animation: $keyframe $duration $iteration $timing-function;
+}
+
+@mixin transform($transform){
+    -webkit-transform: $transform;
+    -ms-transform: $transform;
+    transform: $transform;;
+}

@@ -19,19 +19,29 @@ using Newtonsoft.Json;
 
 namespace BlackjackGame.WebSockets
 {
+    using BlackjackGame = Service.BlackjackGame;
+
+    /// <summary>
+    /// websocket handler implementation for blackjack game
+    /// </summary>
     public class BlackjackGameWebSocketHandler : WebSocketHandler<BlackjackWebsocketWrapper>
     {
-        private Service.BlackjackGame _blackjackGame = new Service.BlackjackGame();
+        private BlackjackGame _blackjackGame = new BlackjackGame();
         private BlackjackMessageBuilder _messageBuilder;
 
-        private readonly Func<HttpContext, DbService> _dbService = (context) => context.RequestServices.GetRequiredService<DbService>();
-        
+        /// <summary>
+        /// intject dependency to use DbService
+        /// </summary>
+        private readonly Func<HttpContext, DbService> _dbService = context =>
+            context.RequestServices.GetRequiredService<DbService>();
+
 
         public BlackjackGameWebSocketHandler()
         {
             _messageBuilder = new BlackjackMessageBuilder(_blackjackGame);
         }
 
+        /// <inheritdoc />
         protected override BlackjackWebsocketWrapper WrapWebsocket(WebSocket webSocket)
         {
             return new BlackjackWebsocketWrapper()
@@ -40,11 +50,20 @@ namespace BlackjackGame.WebSockets
             };
         }
 
+        /// <inheritdoc />
         public override string GenerateKey(HttpContext context)
         {
             return context.Session.Id;
         }
 
+        /// <inheritdoc />
+        /// <summary>
+        /// Handle messages from websocket and response to all
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="buffer"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
         public override async Task OnMessageReceive(HttpContext context, byte[] buffer, WebSocketReceiveResult result)
         {
             var message =
@@ -52,8 +71,6 @@ namespace BlackjackGame.WebSockets
             var messageType = message[BlackjackConstants.Message.MessageType] as string;
             switch (messageType)
             {
-                case BlackjackConstants.Message.GenerateCard:
-                    break;
                 case BlackjackConstants.Message.SitOnPlace:
                     await HandleNewUserInGame(message, context);
                     break;
@@ -67,21 +84,29 @@ namespace BlackjackGame.WebSockets
             await CheckStartGame();
         }
 
+        /// <summary>
+        /// handle user clicked accept cart
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public async Task AcceptGenerateCart(HttpContext context)
         {
-            var userInfo = _websockets[GenerateKey(context)];
+            var userInfo = Websockets[GenerateKey(context)];
             _blackjackGame.GenerateCartForUser(userInfo.Place);
             await SendGameInfoWithCurrentUser();
         }
 
+        /// <summary>
+        /// handle user clicked decline cart
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public async Task DeclineGenerateCart(HttpContext context)
         {
             _blackjackGame.MoveNext(true);
             if (_blackjackGame.GameEnded)
             {
-                var gameResult = _blackjackGame.GameResult;
-                await ReinitGame();
-                await SendGameInfoWithWinner(context, gameResult);
+                await ProcessEndOfGame(context);
             }
             else
             {
@@ -89,23 +114,43 @@ namespace BlackjackGame.WebSockets
             }
         }
 
+        /// <summary>
+        /// handle end of game
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        private async Task ProcessEndOfGame(HttpContext context)
+        {
+            var gameResult = _blackjackGame.GameResult;
+            await ReinitGame();
+            await SendGameInfoWithWinner(context, gameResult);
+        }
+
+        /// <summary>
+        /// reinitialize game to create new one
+        /// </summary>
+        /// <returns></returns>
         public async Task ReinitGame()
         {
-            _blackjackGame = new Service.BlackjackGame();
+            _blackjackGame = new BlackjackGame();
             _messageBuilder = new BlackjackMessageBuilder(_blackjackGame);
-            foreach (var entry in _websockets.ToList())
+            foreach (var entry in Websockets.ToList())
             {
                 var wrapper = entry.Value;
                 var user = wrapper.BlackjackUser;
-                if (user != null)
-                {
-                    user = user.Reinit();
-                    _blackjackGame.AddUser(wrapper.Place, user);
-                }
+                if (user == null) continue;
+                user = user.Reinit();
+                _blackjackGame.AddUser(wrapper.Place, user);
             }
             await CheckStartGame(false);
         }
 
+        /// <summary>
+        /// Hnadle new user connected to game
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public async Task HandleNewUserInGame(Dictionary<string, object> message, HttpContext context)
         {
             var place = Convert.ToInt32(message[BlackjackConstants.Message.PlaceNumber]);
@@ -124,13 +169,13 @@ namespace BlackjackGame.WebSockets
                 {
                     _blackjackGame.AddUser(place, user);
                 }
-                _websockets[GenerateKey(context)].BlackjackUser = user;
-                _websockets[GenerateKey(context)].Place = place;
+                Websockets[GenerateKey(context)].BlackjackUser = user;
+                Websockets[GenerateKey(context)].Place = place;
             }
             else
             {
-                _websockets[GenerateKey(context)].BlackjackUser = curentUser.Value;
-                _websockets[GenerateKey(context)].Place = curentUser.Key;
+                Websockets[GenerateKey(context)].BlackjackUser = curentUser.Value;
+                Websockets[GenerateKey(context)].Place = curentUser.Key;
             }
             await SendGameInfoWithCurrentUser();
         }
@@ -143,7 +188,7 @@ namespace BlackjackGame.WebSockets
         public async Task SendGameInfoWithWinner(HttpContext context, BlackjackGameResult result)
         {
             await _dbService(context).SaveBlackjackGameResult(result);
-            foreach (var websocketWrapper in _websockets)
+            foreach (var websocketWrapper in Websockets)
             {
                 var wrapper = websocketWrapper.Value;
                 await SendMessageJson(wrapper.WebSocket,
@@ -154,7 +199,7 @@ namespace BlackjackGame.WebSockets
         public async Task SendGameInfoWithTask(Func<BlackjackUser, int, Dictionary<string, object>> t)
         {
             var socketsToRemove = new List<string>();
-            foreach (var websocketWrapper in _websockets.ToList())
+            foreach (var websocketWrapper in Websockets.ToList())
             {
                 var wrapper = websocketWrapper.Value;
                 try
@@ -169,7 +214,7 @@ namespace BlackjackGame.WebSockets
             }
             foreach (var key in socketsToRemove)
             {
-                _websockets.Remove(key);
+                Websockets.Remove(key);
             }
         }
 
@@ -187,7 +232,7 @@ namespace BlackjackGame.WebSockets
 
         public async Task Generate2CartsForAllUsers(bool sendInfo)
         {
-            var places = _websockets.Where(w => w.Value.BlackjackUser != null).Select(w => w.Value.Place);
+            var places = Websockets.Where(w => w.Value.BlackjackUser != null).Select(w => w.Value.Place);
             foreach (var place in places)
             {
                 _blackjackGame.GenerateCartForUser(place);
@@ -207,10 +252,9 @@ namespace BlackjackGame.WebSockets
 
         public override async Task OnClosedConnection(HttpContext context)
         {
-            // TODO : reset state of game
-            if (_websockets.ContainsKey(GenerateKey(context)))
+            if (Websockets.ContainsKey(GenerateKey(context)))
             {
-                var wrapper = _websockets[GenerateKey(context)];
+                var wrapper = Websockets[GenerateKey(context)];
                 var place = wrapper.Place;
                 wrapper.BlackjackUser = null;
                 _blackjackGame.RemoveUser(place);
@@ -222,9 +266,7 @@ namespace BlackjackGame.WebSockets
                 if (_blackjackGame.GameStarted && _blackjackGame.NotNullUsers.Count < 2)
                 {
                     _blackjackGame.GameEnded = true;
-                    var gameResult = _blackjackGame.GameResult;
-                    await ReinitGame();
-                    await SendGameInfoWithWinner(context, gameResult);
+                    await ProcessEndOfGame(context);
                 }
             }
         }

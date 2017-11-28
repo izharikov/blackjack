@@ -8,7 +8,7 @@ import { PageWrapper } from '../../Components/PageWrapper/index';
 export class LoginPage extends React.Component {
     render() {
         return <PageWrapper>
-            <AppLoginForm />
+            <AppLoginForm history={this.props}/>
             <br/>
             <Link to="/">Go home</Link><br/>
             <Link to="/register">Register</Link>

@@ -6,6 +6,7 @@ import styles from './styles/index';
 import { EmptyCardSet } from '../../Components/PlayCard/playcartd';
 import { PageWrapper } from '../../Components/PageWrapper/index';
 import { Modal, ModalHeader, ModalContent } from '../../Components/Modal/index';
+import { LoadingComponent } from '../../Components/LoadingComponent/index';
 
 
 class GameRoom extends Component {
@@ -82,7 +83,7 @@ class GameRoom extends Component {
     }
 
     render() {
-        let { gameState = {}, currentUser = {}, winner } = this.props;
+        let { gameState = {}, currentUser = {}, winner, infoLoaded = false } = this.props;
         let { Users: users = [], CurrentUser: moveOfPlayer = {} } = gameState;
         let winnerModal = this.renderWinnersModalModal(winner, this.state, this.closeModal);
         if (!moveOfPlayer) {
@@ -100,7 +101,7 @@ class GameRoom extends Component {
                     userInGame={currentUser.name} />
             </li>);
         }
-        renderedUsers.push(<li className={styles.gameplace} key="empty-cards"
+        renderedUsers.length && renderedUsers.push(<li className={styles.gameplace} key="empty-cards"
             style={{ top: "37%", left: "37%" }}>
             <EmptyCardSet count={10} />
         </li>)
@@ -111,6 +112,7 @@ class GameRoom extends Component {
                 </ul>
             </div>
             {winnerModal}
+            {!infoLoaded && <LoadingComponent/>}
         </PageWrapper>
     }
 }
@@ -132,6 +134,7 @@ export const gameRoomReducer = (state = {}, action) => {
 
 const handleOnMessage = (state, payload) => {
     console.warn('handleOnMessage payload: ', payload)
+    payload.infoLoaded = true;
     switch (payload.messageType) {
         case 'gameState':
             return {

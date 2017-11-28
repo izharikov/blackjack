@@ -13,16 +13,17 @@ class HeaderComponent extends Component {
     }
 
     componentWillMount() {
-        console.log('it\'s time to call user info')
         this.callUserInfo();
     }
 
     render() {
         let { loggedIn = false, name } = this.props;
         return <div className={styles.header}>
-            <div>
-                <Link to="/gameroom">Game</Link>
-            </div>
+            {loggedIn &&
+                <div>
+                    <Link to="/gameroom">Game</Link>
+                </div>
+            }
             {loggedIn && <div>
                 <Link to="/statistics">Statistics</Link>
                 &nbsp;
@@ -37,15 +38,16 @@ class HeaderComponent extends Component {
 }
 
 const USER_INFO_REQUEST = "USER_INFO_REQUEST";
-const USER_INFO_SUCCESS = "USER_INFO_REQUEST";
-const USER_INFO_FAILURE = "USER_INFO_REQUEST";
+const USER_INFO_SUCCESS = "USER_INFO_SUCCESS";
+const USER_INFO_FAILURE = "USER_INFO_FAILURE";
 
 export const headerReducer = (state, action) => {
     switch (action.type) {
         case USER_INFO_SUCCESS:
+            let {name} = action.payload;
             return {
                 ...action.payload,
-                loggedIn: true
+                loggedIn: !!name
             }
         case USER_INFO_FAILURE:
         default:

@@ -5,6 +5,7 @@ import { CALL_API } from "redux-api-middleware";
 import rest from '../../common/rest';
 import { push } from 'react-router-redux';
 import { Redirect } from 'react-router';
+import { LoadingComponent } from '../LoadingComponent/index';
 
 export class LoginForm extends React.Component {
     constructor(props) {
@@ -21,24 +22,35 @@ export class LoginForm extends React.Component {
         })
     }
 
-    render() {
-        let { doLogin, redirectToGameRoom, succeeded } = this.props;
-        if (succeeded) {
-            return <Redirect to="/gameroom"/>
-        }
-        return <form onSubmit={(e) => {
+    onDoLogin = (doLogin) => {
+        return (e) => {
             e.preventDefault();
             doLogin(this.state.name)
-        }}>
-            <label htmlFor="name">
-                Name:
+        }
+    }
+
+    componentWillUpdate(nextProps, nextState) {
+        let { succeeded, redirectToGameRoom } = nextProps;
+        if (succeeded) {
+            redirectToGameRoom();
+        }
+    }
+
+    render() {
+        let { doLogin, redirectToGameRoom, succeeded, requestInProgress = false, history } = this.props;
+        return <div>
+            <form onSubmit={this.onDoLogin(doLogin)}>
+                <label htmlFor="name">
+                    Name:
                 <input type="text" value={this.state.name} onChange={this.onChange} id="name" />
-            </label>
-            <br />
-            <button type="submit">
-                Login
+                </label>
+                <br />
+                <button type="submit">
+                    Login
             </button>
-        </form >
+            </form >
+            {requestInProgress && <LoadingComponent />}
+        </div>
     }
 }
 
@@ -78,11 +90,17 @@ const actions = {
 export const loginReducer = (state = {}, action) => {
     switch (action.type) {
         case LOGIN_SUCCESS:
-            console.log(action.payload);
-            return action.payload;
+            return {
+                ...action.payload,
+                requestInProgress: false
+            };
         case LOGIN_FAILURE:
-            console.warn("Login failure", action);
             return state;
+        case LOGIN_REQUEST:
+            return {
+                ...state,
+                requestInProgress: true
+            }
         default:
             return state;
     }
@@ -99,10 +117,18 @@ const mapDispatchToProps = (dispatch, ownProps) => {
             dispatch(actions.login(name))
         },
         redirectToGameRoom: () => {
-            dispatch(push('/gameroom'))
+            ownProps.history.history.push('/gameroom')
         }
     };
 };
 
-const AppLoginForm = connect(mapStateToProps, mapDispatchToProps)(LoginForm);
+const mergeProps = (stateProps, dispatchProps, ownProps) => {
+    return {
+        ...stateProps,
+        ...dispatchProps,
+        ...ownProps
+    };
+}
+
+const AppLoginForm = connect(mapStateToProps, mapDispatchToProps, mergeProps)(LoginForm);
 export default AppLoginForm;

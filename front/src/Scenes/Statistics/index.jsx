@@ -8,15 +8,31 @@ import styles from './scss';
 class Statistics extends Component {
     constructor(props) {
         super(props);
-        // this.loadStatistics = props.loadStatistics;
     }
 
     componentWillMount() {
         this.props.loadStatistics();
     }
 
-    renderGameResultTable = (gameResult) => {
-        return <table className={`${styles.table} ${styles.table_centered}`}>
+    render() {
+        let { gameResult = [] } = this.props;
+        return (
+            <PageWrapper>
+                <h1 className={styles.centered}>Game results</h1>
+                {gameResult.length ?
+                    <div className={styles.centered}>
+                        <GameResultTable gameResult={gameResult} />
+                    </div> : <div> There is no played games</div>}
+            </PageWrapper>
+        )
+    }
+}
+
+
+class GameResultTable extends Component {
+    render() {
+        let { gameResult } = this.props;
+        return (<table className={`${styles.table} ${styles.table_centered}`}>
             <thead>
                 <tr>
                     <th>Winner score</th>
@@ -31,22 +47,10 @@ class Statistics extends Component {
                     </tr>
                 ))}
             </tbody>
-        </table>;
-    }
-
-    render() {
-        let { gameResult = [] } = this.props;
-        return (
-            <PageWrapper>
-                <h1 className={styles.centered}>Game results</h1>
-                {gameResult.length ?
-                    <div className={styles.centered}>
-                        {this.renderGameResultTable(gameResult)}
-                    </div> : <div> There is no played games</div>}
-            </PageWrapper>
-        )
+        </table>)
     }
 }
+
 
 const STATISTICS_REQUEST = "STATISTICS_REQUEST";
 const STATISTICS_SUCCESS = "STATISTICS_SUCCESS";

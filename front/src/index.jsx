@@ -15,6 +15,7 @@ import { registerReducer } from './Components/RegisterForm/index';
 import styles from './scss/index';
 import {headerReducer} from './Components/Header/index';
 import { StatisticsPage , statisticsReducer} from './Scenes/Statistics/index';
+import createBrowserHistory from 'history/createBrowserHistory'
 
 let initialState = {
     loginPage: {
@@ -36,6 +37,8 @@ let store = createStore(combineReducers({
     header : headerReducer,
     statistics: statisticsReducer
 }), initialState, applyMiddleware(apiMiddleware, logger, websocket));
+
+let history = createBrowserHistory();
 
 render(
     <Provider store={store}>
