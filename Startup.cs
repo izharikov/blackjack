@@ -38,7 +38,9 @@ namespace BlackjackGame
         {
             services
                 .AddAuthentificationWithCookie();
-            services.AddMvc();
+            services
+                .AddMvc()
+                .AddSessionStateTempDataProvider();
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
             {

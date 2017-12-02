@@ -82,7 +82,6 @@ namespace BlackjackGame.Controllers
         public async Task<ActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            HttpContext.Session.Clear();
             return Json(SignInResult.Success);
         }
 
@@ -106,7 +105,6 @@ namespace BlackjackGame.Controllers
             };
 
             var userIdentity = new ClaimsIdentity(claims, "login");
-            HttpContext.Session.SetString("name", name);
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(userIdentity));

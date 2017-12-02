@@ -13,7 +13,7 @@ export class CurrentUserGamePlace extends Component {
             key={`${card.Suit}${card.Rank}`} />);
         let sum = currentUser.carts.map(c => c.Value).reduce((a, b) => a + b, 0);
         return <div className={styles.userPlaceWrapper}>
-            <div className={styles.vericleMiddle}>
+            <div className={styles.verticleMiddle}>
                 <div className={styles.userPlace}>
                     <p className={styles.username}>{currentUser.name}
                         {sum != 0 && `. Sum : ${sum}`}</p>

@@ -3,7 +3,7 @@ import rest from '../../common/rest';
 import { connect } from 'react-redux';
 import { CALL_API } from 'redux-api-middleware';
 import { PageWrapper } from '../../Components/PageWrapper/index';
-import styles from './scss';
+import styles from './scss/index';
 
 class Statistics extends Component {
     constructor(props) {
